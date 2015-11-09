@@ -9,6 +9,12 @@ non-opinionated, and fast routing library for PHP web applications and services.
 **Important:** This is still alpha-quality, but I want to make it real. If you try it out and find any
 problems, please open an issue!
 
+## Install
+
+```
+composer require austinhyde/patchboard
+```
+
 # Example
 
 They say an example is worth a thousand words. Or that might be something else.
