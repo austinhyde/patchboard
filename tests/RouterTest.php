@@ -1,6 +1,7 @@
 <?php
 namespace Patchboard\Test;
 use Patchboard\Router;
+use Patchboard\Context;
 
 class RouterTest extends \PHPUnit_Framework_TestCase {
   /** @dataProvider provideRoutes */
@@ -8,8 +9,8 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     static $i = 0;
     $r = new Router;
 
-    $r->$method('/', function($data) use ($i) {
-      $this->assertEquals([], $data);
+    $r->$method('/', function(Context $ctx) use ($i) {
+      $this->assertEquals([], $ctx->getPathData());
       return $i;
     });
 
@@ -31,7 +32,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
   public function testMultipleHandlers() {
     $r = new Router;
     $i = 0;
-    $h = function($data) use (&$i) { $i += 1; };
+    $h = function(Context $ctx) use (&$i) { $i += 1; };
 
     $r->get('/', $h, $h, $h);
 
@@ -56,15 +57,16 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
   public function testWildcards() {
     $r = new Router;
 
-    $r->get('/{foo}/{bar}', function($data) {
-      return $data;
+    $r->get('/{foo}/{bar}', function(Context $ctx) {
+      return $ctx;
     });
 
-    $data = $r->dispatch('GET', '/asdf/qwer');
+    $ctx = $r->dispatch('GET', '/asdf/qwer');
+    $this->assertInstanceOf(Context::class, $ctx);
     $this->assertEquals([
       'foo' => 'asdf',
       'bar' => 'qwer'
-    ], $data);
+    ], $ctx->getPathData());
   }
 
   public function testCustomPattern() {
@@ -72,19 +74,21 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     $r->setPattern('as', '/a+/');
     $r->setPattern('bs', 'b+');
 
-    $r->get('/{as}/{bs}', function($data) {
-      return $data;
+    $r->get('/{as}/{bs}', function(Context $ctx) {
+      return $ctx;
     });
 
-    $r->get('/{one:bs}/{two:as}', function($data) {
-      return $data;
+    $r->get('/{one:bs}/{two:as}', function(Context $ctx) {
+      return $ctx;
     });
 
     $d1 = $r->dispatch('GET', '/aaaa/bb');
-    $this->assertEquals(['as' => 'aaaa', 'bs' => 'bb'], $d1);
+    $this->assertInstanceOf(Context::class, $d1);
+    $this->assertEquals(['as' => 'aaaa', 'bs' => 'bb'], $d1->getPathData());
 
     $d2 = $r->dispatch('GET', '/bbbb/aaa');
-    $this->assertEquals(['one' => 'bbbb', 'two' => 'aaa'], $d2);
+    $this->assertInstanceOf(Context::class, $d2);
+    $this->assertEquals(['one' => 'bbbb', 'two' => 'aaa'], $d2->getPathData());
   }
 
   public function testNotFound() {
@@ -116,19 +120,21 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     }
   }
 
-  public function testCustomHandlerInvoker() {
-    $r = new Router(new MockHandlerInvoker);
 
-    $r->get('/{one}/{two}', function($a, $b) {
-      return [$a, $b];
+  public function testNestedHandlers() {
+    $r = new Router;
+    $r->get('/', function(Context $ctx) {
+      return 'a' . $ctx->handleNext() . 'e';
+    }, function(Context $ctx) {
+      return 'b' . $ctx->handleNext() . 'd';
+    }, function(Context $ctx) {
+      return 'c';
+    }, function(Context $ctx) {
+      return 'f';
     });
 
-    $this->assertEquals(['foo','bar'], $r->dispatch('GET', '/foo/bar'));
-  }
-}
-
-class MockHandlerInvoker implements \Patchboard\HandlerInvoker {
-  public function invoke($handler, $data) {
-    return call_user_func_array($handler, array_values($data));
+    $result = $r->dispatch('GET', '/');
+    // last handler is not executed because those before it *did* return a value
+    $this->assertEquals('abcde', $result);
   }
 }

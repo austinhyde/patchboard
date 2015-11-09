@@ -23,16 +23,7 @@ They say an example is worth a thousand words. Or that might be something else.
 <?php
 
 $req = Request::createFromGlobals();
-$container->set(Request::class, $req);
-
-$invoker = new Invoker\Invoker;
-$invoker->getParameterResolver()->prependResolver(
-  new TypeHintContainerResolver($container)
-);
-
-$r = new Patchboard\Router(new InvokerInvoker($invoker));
-
-$authorized = function(Request $req) {
+$authorized = function() use ($req) {
   list($user, $pass) = explode(':', base64_decode(
     explode(' ', $req->headers->get('Authorization'))[1]
   ));
@@ -41,10 +32,22 @@ $authorized = function(Request $req) {
   }
 };
 
+$json = function($c) use ($req) {
+  $r = $c->next();
+  if ($r !== null && !($r instanceof Response)) {
+    return new JSONResponse($r, 200);
+  }
+};
+
+$r = new Patchboard\Router;
 $r->group('/users', function($r) {
-  $r->get('/', 'MyApp\Controllers\Users::getAll');
-  $r->post('/', 'MyApp\Controllers\Users::create');
-}, $authorized);
+  $r->get('/', function() {
+    return [['user_id' => 1, 'username' => 'foo']];
+  });
+  $r->get('/{id}', function($data) {
+    return ['user_id' => $data['id'], 'username' => 'foo'];
+  });
+}, $authorized, $json);
 
 try {
   $response = $r->dispatch($req->getMethod(), $req->getPathInfo());
@@ -71,3 +74,14 @@ Put into words:
 7. Create GET and POST routes for `/users`, and instruct the router to call the corresponding controller methods.
 8. Dispatch the call based on HTTP method and path. Handle route-not-found and method-not-allowed errors specially.
 9. Send the response back to the browser.
+
+# Concepts
+
+The driving principle behind Patchboard is to be as simple as possible, while being flexible enough to use in any application. Patchboard does this
+by **only** being a route dispatcher. That's it. At it's core, it's a glorified `call_user_func` implementation, that pattern matches the function name.
+The only assumption it makes is that you are routing on HTTP method and path.
+
+The core unit of Patchboard is the *route*. Each route matches on an HTTP method and path, and has a *handler* attached to it.
+
+A handler is simply either a callable, or an implementation of the `Patchboard\Handler` interface. The callable (or `handle` method), receives arguments
+containing information about the matched route. The handler then can do things like authenticate the user, process the HTTP request, transform outputs, etc.

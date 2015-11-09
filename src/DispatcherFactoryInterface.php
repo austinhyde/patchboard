@@ -1,6 +1,6 @@
 <?php
 namespace Patchboard;
 
-interface DispatcherFactory {
+interface DispatcherFactoryInterface {
   public function getDispatcher($data);
 }

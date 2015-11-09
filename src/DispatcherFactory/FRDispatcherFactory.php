@@ -1,8 +1,11 @@
 <?php
 namespace Patchboard\DispatcherFactory;
-use Patchboard\DispatcherFactory;
+use Patchboard\DispatcherFactoryInterface;
 
-class FRDispatcherFactory implements DispatcherFactory {
+/**
+ * A factory for creating FastRoute-style Dispatchers - i.e. A constructor which takes an array of route data.
+ */
+class FRDispatcherFactory implements DispatcherFactoryInterface {
   private $className;
 
   public function __construct($className) {
@@ -12,6 +15,11 @@ class FRDispatcherFactory implements DispatcherFactory {
     $this->className = $className;
   }
 
+  /**
+   * Creates a new dispatcher based on the given routeData
+   * @param  array $routeData
+   * @return FastRoute\Dispatcher
+   */
   public function getDispatcher($data) {
     $c = $this->className;
     return new $c($data);
