@@ -6,7 +6,7 @@ non-opinionated, and fast routing library for PHP web applications and services.
 
 # Example
 
-They say an example is worth a thousand words.
+They say an example is worth a thousand words. Or that might be something else.
 
 ```php
 <?php
@@ -15,12 +15,16 @@ $req = Request::createFromGlobals();
 $container->set(Request::class, $req);
 
 $invoker = new Invoker\Invoker;
-$invoker->getParameterResolver()->prependResolver(new TypeHintContainerResolver($container));
+$invoker->getParameterResolver()->prependResolver(
+  new TypeHintContainerResolver($container)
+);
 
 $r = new Patchboard\Router(new InvokerInvoker($invoker));
 
 $authorized = function(Request $req) {
-  list($user, $pass) = explode(':', base64_decode(explode(' ', $req->headers->get('Authorization'))[1]));
+  list($user, $pass) = explode(':', base64_decode(
+    explode(' ', $req->headers->get('Authorization'))[1]
+  ));
   if ($user != 'admin' && $pass != 'admin') {
     return new JSONResponse(['message'=>'Not Authorized'], 403);
   }
@@ -38,7 +42,8 @@ catch (Patchboard\RouteNotFoundException $ex) {
   $response = new JSONResponse(['message' => $ex->getMessage()], 404);
 }
 catch (Patchboard\MethodNotAllowedException $ex) {
-  $response = new JSONResponse(['message' => $ex->getMessage()], 405, ['Allow' => $ex->getAllowed()]);
+  $response = new JSONResponse(['message' => $ex->getMessage()], 405,
+    ['Allow' => $ex->getAllowed()]);
 }
 
 $response->send();
