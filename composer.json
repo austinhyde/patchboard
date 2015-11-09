@@ -1,6 +1,6 @@
 {
-    "name": "austinhyde/php-router",
-    "description": "A simple router based on nikic/fastroute, providing a higher-level interface",
+    "name": "austinhyde/patchboard",
+    "description": "A simple router based on nikic/fastroute, providing a higher-level interface and more features",
     "require": {
         "php": ">=5.6.0",
         "nikic/fast-route": "0.6.*",
