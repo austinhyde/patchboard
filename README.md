@@ -1,8 +1,13 @@
 # Patchboard: A simple and fast PHP routing library.
 
+[![Build Status](https://travis-ci.org/austinhyde/php-patchboard.svg?branch=master)](https://travis-ci.org/austinhyde/php-patchboard)
+
 Building on top of [nikic/fastroute](https://github.com/nikic/fastroute), and inspired by the routing
 portion of the [Macaron](http://go-macaron.com/) web framework, this library is a simple, extensible,
 non-opinionated, and fast routing library for PHP web applications and services.
+
+**Important:** This is still alpha-quality, but I want to make it real. If you try it out and find any
+problems, please open an issue!
 
 # Example
 
