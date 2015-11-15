@@ -44,8 +44,8 @@ $r->group('/users', function($r) {
   $r->get('/', function() {
     return [['user_id' => 1, 'username' => 'foo']];
   });
-  $r->get('/{id}', function($data) {
-    return ['user_id' => $data['id'], 'username' => 'foo'];
+  $r->get('/{id}', function(Context $ctx) {
+    return ['user_id' => $ctx->getPathParam('id'), 'username' => 'foo'];
   });
 }, $authorized, $json);
 

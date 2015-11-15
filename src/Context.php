@@ -4,16 +4,16 @@ namespace Patchboard;
 class Context {
   private $method;
   private $path;
-  private $pathData;
+  private $pathParams;
   private $handlers;
   private $attributes;
 
   private $handlerIndex;
 
-  public function __construct($method, $path, $pathData, $handlers) {
+  public function __construct($method, $path, $pathParams, $handlers) {
     $this->method = $method;
     $this->path = $path;
-    $this->pathData = $pathData;
+    $this->pathParams = $pathParams;
     $this->attributes = array();
 
     $this->handlers = $handlers;
@@ -40,8 +40,18 @@ class Context {
    * Path variables extracted from the matched path
    * @return string
    */
-  public function getPathData() {
-    return $this->pathData;
+  public function getPathParams() {
+    return $this->pathParams;
+  }
+
+  /**
+   * Get a specific path parameter, or a default value if it doesn't exist
+   * @param  string $name
+   * @param  mixed  $def
+   * @return string
+   */
+  public function getPathParam($name, $def = null) {
+    return array_key_exists($name, $this->pathParams) ? $this->pathParams[$name] : $def;
   }
 
   /**

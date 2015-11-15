@@ -10,7 +10,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     $r = new Router;
 
     $r->$method('/', function(Context $ctx) use ($i) {
-      $this->assertEquals([], $ctx->getPathData());
+      $this->assertEquals([], $ctx->getPathParams());
       return $i;
     });
 
@@ -66,7 +66,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals([
       'foo' => 'asdf',
       'bar' => 'qwer'
-    ], $ctx->getPathData());
+    ], $ctx->getPathParams());
   }
 
   public function testCustomPattern() {
@@ -84,11 +84,11 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     $d1 = $r->dispatch('GET', '/aaaa/bb');
     $this->assertInstanceOf(Context::class, $d1);
-    $this->assertEquals(['as' => 'aaaa', 'bs' => 'bb'], $d1->getPathData());
+    $this->assertEquals(['as' => 'aaaa', 'bs' => 'bb'], $d1->getPathParams());
 
     $d2 = $r->dispatch('GET', '/bbbb/aaa');
     $this->assertInstanceOf(Context::class, $d2);
-    $this->assertEquals(['one' => 'bbbb', 'two' => 'aaa'], $d2->getPathData());
+    $this->assertEquals(['one' => 'bbbb', 'two' => 'aaa'], $d2->getPathParams());
   }
 
   public function testNotFound() {
