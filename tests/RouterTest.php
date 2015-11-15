@@ -8,7 +8,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
   public function testSimpleRoutes($method) {
     static $i = 0;
     $r = new Router;
-
     $r->$method('/', function(Context $ctx) use ($i) {
       $this->assertEquals([], $ctx->getPathParams());
       return $i;

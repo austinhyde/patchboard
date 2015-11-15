@@ -13,8 +13,8 @@ class Router {
 
   private $patterns = [];
 
-  private $pathStack = [];
-  private $handlerStack = [];
+  private $pathStack = ['/'];
+  private $handlerStack = [[]];
 
   /**
    * Creates a new Router instance with default settings
@@ -58,6 +58,26 @@ class Router {
    */
   public function getDispatcherFactory() {
     return $this->dispatcherFactory;
+  }
+
+  /**
+   * Sets the base path this router serves from
+   * @param  string $path
+   * @return Router $this
+   */
+  public function setBasePath($path) {
+    $this->pathStack[0] = $path;
+    return $this;
+  }
+
+  /**
+   * Sets the base list of handlers to be applied to every request
+   * @param  callable|HandlerInterface... $handlers
+   * @return Router $this
+   */
+  public function useHandlers(...$handlers) {
+    $this->handlerStack[0] = $this->wrapHandlers($handlers);
+    return $this;
   }
 
   /**
@@ -246,9 +266,9 @@ class Router {
 
   /** Join a list of path parts into a single path */
   private function joinPaths($paths) {
-    return '/' . implode('/', array_map(function($p) {
+    return str_replace('//', '/', '/' . implode('/', array_map(function($p) {
       return trim($p, '/ ');
-    }, $paths));
+    }, $paths)));
   }
 
   /** Replace {x} and {x:y} patterns with {x:$x} and {x:$y} where $x and $y are named regex patterns */
